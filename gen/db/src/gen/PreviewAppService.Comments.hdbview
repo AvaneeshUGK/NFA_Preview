@@ -1,0 +1,7 @@
+VIEW PreviewAppService_Comments AS SELECT
+  Comments_0.Comments,
+  Comments_0.event_id
+FROM PreviewApp_Comments AS Comments_0
+WITH ASSOCIATIONS (
+  MANY TO ONE JOIN PreviewAppService_Source_Events AS Source_Events ON (Source_Events.event_id = event_id)
+)

@@ -1,0 +1,8 @@
+COLUMN TABLE PreviewApp_VendorPriceComp (
+  Itemname NVARCHAR(100),
+  Guruprasad DECIMAL(8, 2),
+  Supplier_Demo2 DECIMAL(8, 2),
+  event_id NVARCHAR(5000)
+) WITH ASSOCIATIONS (
+  MANY TO ONE JOIN PreviewApp_Source_Events AS Source_Events ON (Source_Events.event_id = event_id)
+)

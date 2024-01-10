@@ -1,0 +1,7 @@
+COLUMN TABLE PreviewApp_Comments (
+  Comments NVARCHAR(5000),
+  event_id NVARCHAR(5000) NOT NULL,
+  PRIMARY KEY(event_id)
+) WITH ASSOCIATIONS (
+  MANY TO ONE JOIN PreviewApp_Source_Events AS Source_Events ON (Source_Events.event_id = event_id)
+)

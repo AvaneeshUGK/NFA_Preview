@@ -1,0 +1,13 @@
+VIEW PreviewAppService_Source_Events AS SELECT
+  Source_Events_0.event_id,
+  Source_Events_0.Srcevtname,
+  Source_Events_0.Createdby,
+  Source_Events_0.Desc,
+  Source_Events_0.Version,
+  Source_Events_0.status,
+  Source_Events_0.criticality
+FROM PreviewApp_Source_Events AS Source_Events_0
+WITH ASSOCIATIONS (
+  MANY TO MANY JOIN PreviewAppService_VendorPriceComp AS vendorpc ON (event_id = vendorpc.event_id),
+  MANY TO MANY JOIN PreviewAppService_Comments AS Comment ON (event_id = Comment.event_id)
+)

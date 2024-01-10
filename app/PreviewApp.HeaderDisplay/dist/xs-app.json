@@ -1,0 +1,27 @@
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "logout": {
+    "logoutEndpoint": "/do/logout"
+  },
+  "routes": [
+    {
+      "source": "^/service/PreviewApp/(.*)$",
+      "target": "/service/PreviewApp/$1",
+      "destination": "PreviewApp-app-srv",
+      "authenticationType": "xsuaa"
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa"
+    }
+  ],
+  "responseHeaders": [
+    {
+      "name": "Content-Security-Policy",
+      "value": "frame-ancestors 'self' *.hana.ondemand.com *applicationstudio.cloud.sap"
+    }
+  ]
+}

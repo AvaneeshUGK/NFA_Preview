@@ -1,0 +1,2 @@
+sap.ui.require(["sap/fe/test/JourneyRunner","PreviewApp/Preview/test/integration/FirstJourney","PreviewApp/Preview/test/integration/pages/VendorPriceCompList","PreviewApp/Preview/test/integration/pages/VendorPriceCompObjectPage"],function(e,r,i,t){"use strict";var e=new e({launchUrl:sap.ui.require.toUrl("PreviewApp/Preview")+"/index.html"});e.run({pages:{onTheVendorPriceCompList:i,onTheVendorPriceCompObjectPage:t}},r.run)});
+//# sourceMappingURL=opaTests.qunit.js.map

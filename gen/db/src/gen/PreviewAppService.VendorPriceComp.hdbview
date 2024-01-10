@@ -1,0 +1,9 @@
+VIEW PreviewAppService_VendorPriceComp AS SELECT
+  VendorPriceComp_0.Itemname,
+  VendorPriceComp_0.Guruprasad,
+  VendorPriceComp_0.Supplier_Demo2,
+  VendorPriceComp_0.event_id
+FROM PreviewApp_VendorPriceComp AS VendorPriceComp_0
+WITH ASSOCIATIONS (
+  MANY TO ONE JOIN PreviewAppService_Source_Events AS Source_Events ON (Source_Events.event_id = event_id)
+)

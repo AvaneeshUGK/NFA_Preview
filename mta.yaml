@@ -1,0 +1,256 @@
+_schema-version: '3.1'
+ID: PreviewApp
+version: 1.0.0
+description: A simple CAP project.
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - rm -rf build/dist
+        - mkdir -p build/dist
+        - rm -rf build/ui-deployer
+        - mkdir -p build/ui-deployer
+    - builder: custom
+      commands:
+        - npm install --production
+        - >-
+          bash -c "cds -v | grep 'cds-dk' || npm i --production --no-save
+          @sap/cds-dk @sap/mdk-tools"
+        - bash -c "export PATH=$PATH:$(pwd)/node_modules/.bin"
+        - cds build --production
+modules:
+  - name: PreviewApp-PreviewApp.HeaderDisplay
+    type: html5
+    path: app/PreviewApp.HeaderDisplay
+    build-parameters:
+      builder: custom
+      commands:
+        - rm -rf dist-zip dist
+        - >-
+          npx -p @ui5/cli@^3.0.0 ui5 build --dest dist
+          --include-task=generateManifestBundle
+          --include-task=generateCachebusterInfo
+        - mkdir dist-zip
+        - >-
+          bash -c "cd dist && npx bestzip
+          ../dist-zip/PreviewAppHeaderDisplay.zip *"
+      _artifactName: PreviewAppHeaderDisplay.zip
+      supported-platforms: []
+      build-result: dist-zip
+  - name: PreviewApp-PreviewApp.Preview
+    type: html5
+    path: app/PreviewApp.Preview
+    build-parameters:
+      builder: custom
+      commands:
+        - rm -rf dist-zip dist
+        - >-
+          npx -p @ui5/cli@^3.0.0 ui5 build --dest dist
+          --include-task=generateManifestBundle
+          --include-task=generateCachebusterInfo
+        - mkdir dist-zip
+        - bash -c "cd dist && npx bestzip ../dist-zip/PreviewAppPreview.zip *"
+      _artifactName: PreviewAppPreview.zip
+      supported-platforms: []
+      build-result: dist-zip
+  - name: PreviewApp-PreviewApp.PreviewFinal
+    type: html5
+    path: app/PreviewApp.PreviewFinal
+    build-parameters:
+      builder: custom
+      commands:
+        - rm -rf dist-zip dist
+        - >-
+          npx -p @ui5/cli@^3.0.0 ui5 build --dest dist
+          --include-task=generateManifestBundle
+          --include-task=generateCachebusterInfo
+        - mkdir dist-zip
+        - >-
+          bash -c "cd dist && npx bestzip ../dist-zip/PreviewAppPreviewFinal.zip
+          *"
+      _artifactName: PreviewAppPreviewFinal.zip
+      supported-platforms: []
+      build-result: dist-zip
+  - name: PreviewApp-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm
+      ignore:
+        - node_modules
+        - package-lock.json
+    requires:
+      - name: PreviewApp-service-uaa
+      - name: PreviewApp-service-db
+  - name: PreviewApp-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      memory: 256MB
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+    build-parameters:
+      builder: npm
+      ignore:
+        - node_modules
+        - package-lock.json
+    requires:
+      - name: PreviewApp-service-uaa
+      - name: PreviewApp-service-db
+      - name: PreviewApp-service-destination
+      - name: PreviewApp-service-metadata
+      - name: PreviewApp-service-connectivity
+      - name: PreviewApp-service-logs
+  - name: PreviewApp-aux-destinations
+    type: com.sap.application.content
+    parameters:
+      content:
+        subaccount:
+          existing_destinations_policy: update
+          destinations:
+            - Authentication: OAuth2UserTokenExchange
+              Name: PreviewApp-service-uaa
+              ServiceInstanceName: PreviewApp-uaa
+              ServiceKeyName: PreviewApp-uaa-key
+              sap.cloud.service: lcap.PreviewApp
+            - Authentication: OAuth2UserTokenExchange
+              Name: PreviewApp-app-srv
+              TokenServiceInstanceName: PreviewApp-uaa
+              TokenServiceKeyName: PreviewApp-uaa-key
+              URL: ~{srv-api/srv-url}
+              sap.cloud.service: lcap.PreviewApp
+            - Name: PreviewApp-service-html5-apps-repo-host
+              ServiceInstanceName: PreviewApp-html5-apps-repo-host
+              ServiceKeyName: PreviewApp-html5-apps-repo-host-key
+              sap.cloud.service: lcap.PreviewApp
+            - Authentication: OAuth2UserTokenExchange
+              Name: PreviewApp-PreviewAppService
+              TokenServiceInstanceName: PreviewApp-uaa
+              TokenServiceKeyName: PreviewApp-uaa-key
+              URL: ~{srv-api/srv-url}/service/PreviewApp
+              sap.cloud.service: lcap.PreviewApp
+              sap.applicationdevelopment.actions.enabled: false
+              sap.build.usage: CAP
+              HTML5.DynamicDestination: false
+              WebIDEEnabled: false
+              MobileEnabled: false
+              AppgyverEnabled: false
+    build-parameters:
+      no-source: true
+    requires:
+      - name: PreviewApp-service-uaa
+        parameters:
+          service-key:
+            name: PreviewApp-uaa-key
+      - name: srv-api
+      - name: PreviewApp-service-html5-apps-repo-host
+        parameters:
+          service-key:
+            name: PreviewApp-html5-apps-repo-host-key
+      - name: PreviewApp-service-destination
+        parameters:
+          content-target: true
+  - name: PreviewApp-launchpad
+    type: html5
+    path: build/launchpad
+    build-parameters:
+      builder: custom
+      commands:
+        - npm install
+        - >-
+          npx -p @ui5/cli@^3.0.0 ui5 build --dest dist
+          --include-task=generateManifestBundle
+          --include-task=generateCachebusterInfo
+        - bash -c "cd dist && npx bestzip ../../../build/dist/launchpad.zip *"
+        - rm -rf dist
+      _artifactName: launchpad.zip
+      supported-platforms: []
+      build-result: ../../build/dist
+  - name: PreviewApp-aux-ui-deployer
+    type: com.sap.application.content
+    path: build/ui-deployer
+    build-parameters:
+      build-result: resources
+      requires:
+        - name: PreviewApp-PreviewApp.HeaderDisplay
+          artifacts:
+            - PreviewAppHeaderDisplay.zip
+          target-path: resources
+        - name: PreviewApp-PreviewApp.Preview
+          artifacts:
+            - PreviewAppPreview.zip
+          target-path: resources
+        - name: PreviewApp-PreviewApp.PreviewFinal
+          artifacts:
+            - PreviewAppPreviewFinal.zip
+          target-path: resources
+        - name: PreviewApp-launchpad
+          artifacts:
+            - launchpad.zip
+          target-path: resources
+    requires:
+      - name: PreviewApp-service-html5-apps-repo-host
+        parameters:
+          content-target: true
+resources:
+  - type: org.cloudfoundry.managed-service
+    name: PreviewApp-service-uaa
+    parameters:
+      service: xsuaa
+      service-plan: application
+      service-name: PreviewApp-uaa
+      path: xs-security.json
+      config:
+        oauth2-configuration:
+          redirect-uris:
+            - https://*.${default-domain}/login/*
+        xsappname: PreviewApp-${space}
+        role-collections: []
+  - type: org.cloudfoundry.managed-service
+    name: PreviewApp-service-db
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+      service-name: PreviewApp-db
+  - type: org.cloudfoundry.managed-service
+    name: PreviewApp-service-destination
+    parameters:
+      service: destination
+      service-plan: lite
+      service-name: PreviewApp-destination
+      config:
+        HTML5Runtime_enabled: true
+        version: 1.0.0
+  - type: org.cloudfoundry.user-provided-service
+    name: PreviewApp-service-metadata
+    parameters:
+      service: metadata
+      service-plan: standard
+      service-name: PreviewApp-metadata
+      config:
+        default-domain: ${default-domain}
+  - type: org.cloudfoundry.managed-service
+    name: PreviewApp-service-connectivity
+    parameters:
+      service: connectivity
+      service-plan: lite
+      service-name: PreviewApp-connectivity
+  - type: org.cloudfoundry.managed-service
+    name: PreviewApp-service-logs
+    parameters:
+      service: application-logs
+      service-plan: lite
+      service-name: PreviewApp-logs
+  - type: org.cloudfoundry.managed-service
+    name: PreviewApp-service-html5-apps-repo-host
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+      service-name: PreviewApp-html5-apps-repo-host

@@ -1,0 +1,2 @@
+sap.ui.define(["sap/fe/test/ListReport"],function(e){"use strict";var t={actions:{},assertions:{}};return new e({appId:"PreviewApp.Preview",componentId:"VendorPriceCompList",entitySet:"VendorPriceComp"},t)});
+//# sourceMappingURL=VendorPriceCompList.js.map

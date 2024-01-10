@@ -1,0 +1,12 @@
+COLUMN TABLE PreviewAppService_Comments_drafts (
+  Comments NVARCHAR(5000) NULL,
+  event_id NVARCHAR(5000) NOT NULL,
+  IsActiveEntity BOOLEAN,
+  HasActiveEntity BOOLEAN,
+  HasDraftEntity BOOLEAN,
+  DraftAdministrativeData_DraftUUID NVARCHAR(36) NOT NULL,
+  PRIMARY KEY(event_id)
+) WITH ASSOCIATIONS (
+  MANY TO ONE JOIN PreviewAppService_Source_Events_drafts AS Source_Events ON (Source_Events.event_id = event_id),
+  MANY TO ONE JOIN PreviewAppService_DraftAdministrativeData AS DraftAdministrativeData ON (DraftAdministrativeData.DraftUUID = DraftAdministrativeData_DraftUUID)
+)

@@ -1,0 +1,18 @@
+COLUMN TABLE PreviewAppService_Source_Events_drafts (
+  event_id NVARCHAR(5000) NOT NULL,
+  Srcevtname NVARCHAR(5000) NULL,
+  Createdby NVARCHAR(50) NULL,
+  Desc NVARCHAR(100) NULL,
+  Version NVARCHAR(10) NULL,
+  status NVARCHAR(100) NULL,
+  criticality INTEGER NULL,
+  IsActiveEntity BOOLEAN,
+  HasActiveEntity BOOLEAN,
+  HasDraftEntity BOOLEAN,
+  DraftAdministrativeData_DraftUUID NVARCHAR(36) NOT NULL,
+  PRIMARY KEY(event_id)
+) WITH ASSOCIATIONS (
+  MANY TO MANY JOIN PreviewAppService_VendorPriceComp AS vendorpc ON (event_id = vendorpc.event_id),
+  MANY TO MANY JOIN PreviewAppService_Comments_drafts AS Comment ON (event_id = Comment.event_id),
+  MANY TO ONE JOIN PreviewAppService_DraftAdministrativeData AS DraftAdministrativeData ON (DraftAdministrativeData.DraftUUID = DraftAdministrativeData_DraftUUID)
+)

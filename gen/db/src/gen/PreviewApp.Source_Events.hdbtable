@@ -1,0 +1,13 @@
+COLUMN TABLE PreviewApp_Source_Events (
+  event_id NVARCHAR(5000) NOT NULL,
+  Srcevtname NVARCHAR(5000),
+  Createdby NVARCHAR(50),
+  Desc NVARCHAR(100),
+  Version NVARCHAR(10),
+  status NVARCHAR(100),
+  criticality INTEGER,
+  PRIMARY KEY(event_id)
+) WITH ASSOCIATIONS (
+  MANY TO MANY JOIN PreviewApp_VendorPriceComp AS vendorpc ON (event_id = vendorpc.event_id),
+  MANY TO MANY JOIN PreviewApp_Comments AS Comment ON (event_id = Comment.event_id)
+)

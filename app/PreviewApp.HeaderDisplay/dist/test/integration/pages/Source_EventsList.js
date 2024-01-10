@@ -1,0 +1,2 @@
+sap.ui.define(["sap/fe/test/ListReport"],function(e){"use strict";var t={actions:{},assertions:{}};return new e({appId:"PreviewApp.HeaderDisplay",componentId:"Source_EventsList",entitySet:"Source_Events"},t)});
+//# sourceMappingURL=Source_EventsList.js.map
